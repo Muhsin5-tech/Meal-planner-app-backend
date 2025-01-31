@@ -7,10 +7,10 @@ name = "pypi"
 flask = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
-flask-cors = "*"
 psycopg2-binary = "*"
-python-dotenv = "*"
 gunicorn = "*"
+flask-cors = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
