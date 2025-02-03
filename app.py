@@ -4,7 +4,9 @@ from models import db, User, Meal, DayPlan, DayPlanMeal
 from config import Config
 from flask_cors import CORS
 from datetime import datetime
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
