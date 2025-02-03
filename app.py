@@ -4,9 +4,7 @@ from models import db, User, Meal, DayPlan, DayPlanMeal
 from config import Config
 from flask_cors import CORS
 from datetime import datetime
-from dotenv import load_dotenv
 
-load_dotenv()
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
@@ -32,7 +30,6 @@ def get_meal(id):
 def create_meal():
     data = request.get_json()
     
-    # Ensure required fields are provided
     if not data.get('name') or not isinstance(data['name'], str):
         return jsonify({"error": "Valid Name is required."}), 400
     if not data.get('ingredients') or not isinstance(data['ingredients'], str):
@@ -63,7 +60,6 @@ def update_meal(id):
     meal = Meal.query.get_or_404(id)
     data = request.get_json()
 
-    # Validate each field and update meal properties
     if 'name' in data:
         if not isinstance(data['name'], str):
             return jsonify({"error": "Valid Name is required."}), 400
