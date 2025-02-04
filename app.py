@@ -2,15 +2,17 @@ from flask import Flask, request, jsonify
 from flask_migrate import Migrate
 from models import db, User, Meal, DayPlan, DayPlanMeal
 from config import Config
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from datetime import datetime
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 app = Flask(__name__)
 app.config.from_object(Config)
 
-CORS(app, origins=["https://meal-planner-app-frontend.onrender.com"])
+# Allow CORS for all domains, adjust as needed for production security
+CORS(app, origins=[os.getenv("FRONTEND_URL")])
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -32,7 +34,6 @@ def get_meal(id):
 @app.route('/meals', methods=['POST'])
 def create_meal():
     data = request.get_json()
-    
     if not data.get('name') or not isinstance(data['name'], str):
         return jsonify({"error": "Valid Name is required."}), 400
     if not data.get('ingredients') or not isinstance(data['ingredients'], str):
@@ -48,7 +49,6 @@ def create_meal():
         instructions=data['instructions'],
         image_url=data['image_url']
     )
-
     db.session.add(new_meal)
     db.session.commit()
 
@@ -61,7 +61,6 @@ def create_meal():
 def update_meal(id):
     meal = Meal.query.get_or_404(id)
     data = request.get_json()
-
     if 'name' in data:
         if not isinstance(data['name'], str):
             return jsonify({"error": "Valid Name is required."}), 400
@@ -166,5 +165,9 @@ def assign_meals_to_dayplan(id):
     db.session.commit()
     return jsonify({"message": "Meals assigned to day plan successfully!"}), 201
 
+@app.errorhandler(404)
+def resource_not_found(e):
+    return jsonify(error=str(e)), 404
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
