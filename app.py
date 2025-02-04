@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_migrate import Migrate
 from models import db, User, Meal, DayPlan, DayPlanMeal
 from config import Config
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -10,7 +10,7 @@ load_dotenv()
 app = Flask(__name__)
 app.config.from_object(Config)
 
-CORS(app, origins=["https://meal-planner-app-frontend.onrender.com, http://localhost:5173"])
+CORS(app)
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -20,16 +20,19 @@ def index():
     return "<h1>Welcome to my Meal Planner App Backend</h1>"
 
 @app.route('/meals', methods=['GET'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def get_meals():
     meals = Meal.query.all()
     return jsonify([meal.to_dict() for meal in meals])
 
 @app.route('/meals/<int:id>', methods=['GET'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def get_meal(id):
     meal = Meal.query.get_or_404(id)
     return jsonify(meal.to_dict())
 
 @app.route('/meals', methods=['POST'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def create_meal():
     data = request.get_json()
     
@@ -58,6 +61,7 @@ def create_meal():
     }), 201
 
 @app.route('/meals/<int:id>', methods=['PUT'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def update_meal(id):
     meal = Meal.query.get_or_404(id)
     data = request.get_json()
@@ -90,6 +94,7 @@ def update_meal(id):
     })
 
 @app.route('/meals/<int:id>', methods=['DELETE'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def delete_meal(id):
     meal = Meal.query.get_or_404(id)
     db.session.delete(meal)
@@ -97,16 +102,19 @@ def delete_meal(id):
     return jsonify({"message": "Meal deleted successfully!"}), 204
 
 @app.route('/dayplans', methods=['GET'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def get_dayplans():
     dayplans = DayPlan.query.all()
     return jsonify([dayplan.to_dict() for dayplan in dayplans])
 
 @app.route('/dayplans/<int:id>', methods=['GET'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def get_dayplan(id):
     dayplan = DayPlan.query.get_or_404(id)
     return jsonify(dayplan.to_dict())
 
 @app.route('/dayplans', methods=['POST'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def create_dayplan():
     data = request.get_json()
     if not data.get('day_of_week') or not data.get('user_id'):
@@ -122,6 +130,7 @@ def create_dayplan():
     }), 201
 
 @app.route('/dayplans/<int:id>', methods=['PUT'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def update_dayplan(id):
     dayplan = DayPlan.query.get_or_404(id)
     data = request.get_json()
@@ -135,6 +144,7 @@ def update_dayplan(id):
     })
 
 @app.route('/dayplans/<int:id>', methods=['DELETE'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def delete_dayplan(id):
     dayplan = DayPlan.query.get_or_404(id)
     db.session.delete(dayplan)
@@ -142,6 +152,7 @@ def delete_dayplan(id):
     return jsonify({"message": "Day plan deleted successfully!"}), 204
 
 @app.route('/dayplans/<int:id>/assign_meals', methods=['POST'])
+@cross_origin(origin='https://meal-planner-app-frontend.onrender.com', supports_credentials=True)
 def assign_meals_to_dayplan(id):
     dayplan = DayPlan.query.get_or_404(id)
     data = request.get_json()
@@ -166,6 +177,12 @@ def assign_meals_to_dayplan(id):
     db.session.commit()
     return jsonify({"message": "Meals assigned to day plan successfully!"}), 201
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'https://meal-planner-app-frontend.onrender.com')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
