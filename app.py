@@ -10,17 +10,10 @@ load_dotenv()
 app = Flask(__name__)
 app.config.from_object(Config)
 
-CORS(app, resources={r"/*": {"prigins": "http://localhost:5173"}})
+CORS(app, origins=["https://meal-planner-app-frontend.onrender.com, http://localhost:5173"])
 
 db.init_app(app)
 migrate = Migrate(app, db)
-
-@app.after_request
-def after_request(response):
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    return response
 
 @app.route('/')
 def index():
@@ -63,7 +56,6 @@ def create_meal():
         "message": "Meal added successfully",
         'meal': new_meal.to_dict()
     }), 201
-
 
 @app.route('/meals/<int:id>', methods=['PUT'])
 def update_meal(id):
